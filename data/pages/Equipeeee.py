@@ -1,12 +1,29 @@
 import streamlit as st
+# Configuración de la página - ESTO DEBE SER LO PRIMERO QUE USES DE STREAMLIT
+st.set_page_config(page_title="Universitario de La Plata - Dashboard", layout="wide")
+
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from PIL import Image
+import sys
+from pathlib import Path
 
+# Agregar la ruta del proyecto al path de Python
+root_path = Path(__file__).parent.parent.absolute()
+sys.path.append(str(root_path))
 
-# Configuración de la página
-st.set_page_config(page_title="Universitario de La Plata - Dashboard", layout="wide")
+# Importar el módulo de autenticación
+try:
+    from auth.login import require_auth
+    from auth.session import initialize_session
+    
+    # Inicializar y verificar autenticación
+    initialize_session()
+    require_auth()
+except ImportError:
+    st.error("No se pudo importar el módulo de autenticación. Asegúrate de que exista la carpeta 'auth' con los archivos necesarios.")
+    st.stop()
 
 # Función para agregar logo y título
 def add_header():
@@ -17,13 +34,16 @@ def add_header():
         st.markdown("### Dashboard de Análisis de Rendimiento")
     
     with col2:
-        # Puedes reemplazar esto con la URL del logo real o un archivo local
         try:
-            logo = Image.open(r"C:\Users\dell\Desktop\Python\Catapult\escudo uni.jpg")
-            st.image(logo, width=450)
-        except Exception:
-            # Si no se puede cargar el logo, crear uno simple
-            st.warning("No se pudo cargar el logo")
+            # Usar la ruta correcta para la imagen
+            logo_path = Path(root_path, "data", "escudo uni.jpg")
+            if logo_path.exists():
+                logo = Image.open(logo_path)
+                st.image(logo, width=150)
+            else:
+                st.warning("Logo no encontrado en: " + str(logo_path))
+        except Exception as e:
+            st.warning(f"No se pudo cargar el logo: {e}")
 
 # Función para cargar datos
 @st.cache_data
@@ -38,6 +58,7 @@ def load_data():
     except Exception as e:
         st.error(f"Error al cargar datos: {e}")
         return None
+
 
 def procesar_sesiones(df, tipo_sesion='Partido', max_fechas=None):
     """
@@ -487,15 +508,34 @@ def main():
     if df is not None:
         st.success(f"Datos cargados correctamente: {len(df)} registros")
         
+        # Definir las 4 opciones fijas para el selector
+        tipos_sesion = ["Partido", "Martes", "Jueves", "Semana"]
+        
         # Crear selector para tipo de sesión
-        tipos_sesion = ["Partido", "Martes", "Jueves"]
         tipo_seleccionado = st.selectbox(
             "Selecciona el tipo de sesión a analizar:",
             tipos_sesion
         )
         
-        # Procesar datos según el tipo de sesión seleccionado
-        sesiones_stats = procesar_sesiones(df, tipo_sesion=tipo_seleccionado)
+        # Procesar datos según la selección
+        if tipo_seleccionado == "Semana":
+            # Para "Semana", procesamos los últimos 3 registros independientemente del tipo
+            # Primero ordenamos por fecha
+            df_ordenado = df.copy()
+            if not pd.api.types.is_datetime64_dtype(df_ordenado['Date']):
+                df_ordenado['Date'] = pd.to_datetime(df_ordenado['Date'], errors='coerce')
+            
+            # Obtenemos las fechas únicas y tomamos las 3 últimas
+            ultimas_fechas = sorted(df_ordenado['Date'].unique())[-3:]
+            
+            # Filtramos datos de esas fechas
+            df_ultimas = df_ordenado[df_ordenado['Date'].isin(ultimas_fechas)]
+            
+            # Procesamos estos datos combinados
+            sesiones_stats = procesar_sesiones(df_ultimas, tipo_sesion="")
+        else:
+            # Para los demás tipos, procesamos normalmente
+            sesiones_stats = procesar_sesiones(df, tipo_sesion=tipo_seleccionado)
         
         if sesiones_stats is not None and not sesiones_stats.empty:
             st.info(f"Se encontraron {len(sesiones_stats)} registros de {tipo_seleccionado}")
@@ -510,7 +550,11 @@ def main():
             )
             
             # Procesar datos de sesiones, velocidad y aceleraciones
-            sesiones_df = df[df['Session Title'].str.contains(tipo_seleccionado, case=False, na=False)].copy()
+            if tipo_seleccionado == "Semana":
+                # Para "Semana", usamos el DataFrame de las últimas 3 fechas
+                sesiones_df = df_ultimas.copy()
+            else:
+                sesiones_df = df[df['Session Title'].str.contains(tipo_seleccionado, case=False, na=False)].copy()
             
             # Convertir fecha a datetime si no lo está
             if not pd.api.types.is_datetime64_dtype(sesiones_df['Date']):

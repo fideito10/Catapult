@@ -3,14 +3,20 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
+import pandas as pd
+import plotly.express as px
+from PIL import Image
+import numpy as np
 
-# Agrega la ruta del proyecto al path de Python
-root_path = Path(__file__).parent.parent.absolute()
+# Agregar la ruta del proyecto al path de Python
+root_path = Path(__file__).parent.absolute()
 sys.path.append(str(root_path))
 
-# Importa las funciones de autenticación
-from EXTRAIDO.LOGIN import check_password, logout, get_login_status, set_login_status
+# Importar módulos de autenticación
+from auth.session import initialize_session, get_login_status, set_login_status
+from auth.login import login_form, logout
 
+# Configuración inicial de la página
 st.set_page_config(
     page_title="Análisis Deportivo",
     page_icon="🏉",
@@ -28,23 +34,19 @@ css = '''
 '''
 st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
+# Inicializar la sesión
+initialize_session()
+
 # Función principal
 def main():
-    st.title("Aplicación de Análisis Deportivo")
+    st.title("Bienvenido al Club Universitario de la Plata")
 
-    # Verificar el token de sesión en la URL
-    params = st.query_params.to_dict()
-    if 'session_token' in params and not get_login_status():
-        set_login_status(True)
-
-    if check_password():
+    if login_form():
         # Personalización de la barra lateral
         with st.sidebar:
             # Encabezado con información del sistema
             st.title('Análisis Univesitario')
             st.subheader(f"Bienvenido, Usuario")
-           
-            
             
             with st.container():
                 st.write("🎯 **Metricas**")
@@ -73,33 +75,45 @@ def main():
                 st.rerun()
 
         # Contenido principal
-        st.write("### Bienvenido al sistema de análisis deportivo")
         
-        # Resumen en columnas
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(label="Distancia Total (equipo)", value="127.5 km", delta="2.3 km")
-        with col2:
-            st.metric(label="Sprints", value="87", delta="-3")
-        with col3:
-            st.metric(label="Aceleraciones", value="245", delta="15")
+        # Introducción a la aplicación
+        st.header("Sistema de Análisis Deportivo")
         
-        # Información general
-        st.subheader("Información general")
+        st.subheader("¿Cómo funciona esta aplicación?")
         st.write("""
-        Este dashboard proporciona una visión general del rendimiento del equipo y los jugadores. 
-        Utiliza la barra lateral para navegar a secciones específicas de la aplicación.
+        Esta plataforma te permite analizar datos deportivos recopilados durante entrenamientos y partidos.
+        Diseñada específicamente para el Club Universitario de la Plata, ofrece métricas
+        detalladas que ayudan a optimizar el rendimiento de los jugadores y del equipo.
         """)
         
-        # Datos de ejemplo
-        st.subheader("Últimos datos registrados")
-        data = {
-            "Fecha": ["01/05/2024", "28/04/2024", "25/04/2024", "22/04/2024"],
-            "Sesión": ["Partido", "Entrenamiento", "Partido", "Entrenamiento"],
-            "Duración": ["90 min", "120 min", "90 min", "110 min"],
-            "Dist. Total": ["127.5 km", "98.2 km", "125.7 km", "92.5 km"]
-        }
-        st.dataframe(data, use_container_width=True)
+        # Información sobre las secciones
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.info("### 📊 Análisis de Equipo")
+            st.write("""
+            En la sección de **Análisis de Equipo** podrás:
+            
+            - Visualizar métricas colectivas como distancia total recorrida
+            - Analizar tendencias de rendimiento del equipo a lo largo del tiempo
+            - Comparar estadísticas entre diferentes partidos y entrenamientos
+            - Identificar patrones tácticos y áreas de mejora grupal
+            """)
+        
+        with col2:
+            st.info("### 👤 Análisis de Jugador")
+            st.write("""
+            En la sección de **Análisis de Jugador** podrás:
+            
+            - Examinar métricas individuales como sprints y aceleraciones
+            - Evaluar el progreso de cada atleta durante la temporada
+            - Comparar rendimiento entre jugadores de la misma posición
+            - Identificar fortalezas y áreas de desarrollo personales
+            """)
+        
+    
+        
+        
     else:
         st.write("Por favor, inicia sesión para acceder al contenido.")
 

@@ -4,9 +4,36 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 from datetime import datetime, timedelta
+import sys
+from pathlib import Path
+
+# Agregar la ruta del proyecto al path de Python
+root_path = Path(__file__).parent.parent.absolute()
+sys.path.append(str(root_path))
+
+# Importar el módulo de autenticación
+try:
+    from auth.login import require_auth
+    from auth.session import initialize_session
+    
+    # Inicializar y verificar autenticación
+    initialize_session()
+    require_auth()
+except ImportError:
+    st.error("No se pudo importar el módulo de autenticación. Asegúrate de que exista la carpeta 'auth' con los archivos necesarios.")
+    st.stop()
 
 # Configuración de la página
 st.set_page_config(page_title="Universitario de La Plata - Dashboard Jugador", layout="wide")
+
+# Ocultar las páginas automáticas
+css = '''
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    [data-testid="collapsedControl"] {display: none}
+    div[data-testid="stSidebarNav"] {display: none;}
+'''
+st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
 
 # Función para agregar logo y título
 def add_header():
@@ -18,10 +45,15 @@ def add_header():
     
     with col2:
         try:
-            logo = Image.open(r"C:\Users\dell\Desktop\Python\Catapult\escudo uni.jpg")
-            st.image(logo, width=450)
-        except Exception:
-            st.warning("No se pudo cargar el logo")
+            # Usar la ruta correcta para la imagen
+            logo_path = Path(root_path, "data", "escudo uni.jpg")
+            if logo_path.exists():
+                logo = Image.open(logo_path)
+                st.image(logo, width=150)
+            else:
+                st.warning("Logo no encontrado en: " + str(logo_path))
+        except Exception as e:
+            st.warning(f"No se pudo cargar el logo: {e}")
 
 # Función para calcular ratio Agudo:Crónico
 def calcular_ratio_AC(datos_jugador, ventana_aguda=7, ventana_cronica=28):

@@ -36,7 +36,7 @@ def logout():
 
 # Aplicación principal
 def main():
-    st.title("Aplicación de Análisis Deportivo")
+    st.title("Análisis Universitario de la Plata")
 
     # Verificar el token de sesión en la URL
     params = st.query_params.to_dict()
