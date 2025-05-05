@@ -63,7 +63,7 @@ def main():
                 st.write("**Versión del Sistema:** 1.0.0")
                 st.write("**Última Actualización:** 2024-05-02")
                 st.write("**Soporte:** calvoj550@gmail.com")
-                st.write("**Documentación:** [Ver Manual de Usuario]()")
+                st.write("**Documentación:** [Ver Manual de Usuario](https://github.com/usuario/proyecto/docs)")
 
             # Footer
             st.divider()
