@@ -52,18 +52,14 @@ def main():
     if login_form():
         # Personalización de la barra lateral
         with st.sidebar:
-            # Encabezado con información del sistema
-            st.title('Análisis Univesitario')
+            # Encabezado con información del sistema            st.title('Análisis Univesitario')
             st.subheader(f"Bienvenido, Usuario")
-            
             with st.container():
                 st.write("🎯 **Metricas**")
-                if Path(f"{Path(__file__).parent}/pages/Dashoboard.py").exists():
-                    st.page_link("pages/Dashoboard.py", label=" Dashboard Principal", icon="📊")
-                if Path(f"{Path(__file__).parent}/pages/Equipeeee.py").exists():
-                    st.page_link("pages/Equipeeee.py", label=" Análisis de Equipo", icon="⚽")
-                if Path(f"{Path(__file__).parent}/pages/Jugadorr.py").exists():
-                    st.page_link("pages/Jugadorr.py", label=" Análisis de Jugador", icon="👤")
+                # Usamos rutas relativas para mayor compatibilidad con Streamlit Cloud
+                st.page_link("pages/Dashoboard.py", label=" Dashboard Principal", icon="📊")
+                st.page_link("pages/Equipeeee.py", label=" Análisis de Equipo", icon="⚽")
+                st.page_link("pages/Jugadorr.py", label=" Análisis de Jugador", icon="👤")
 
             # Información del sistema
             st.divider()
