@@ -39,7 +39,15 @@ initialize_session()
 
 # Función principal
 def main():
-    st.title("Bienvenido al Club Universitario de la Plata")
+    st.title("Sistema de Análisis para Rugby")
+    st.markdown("""
+    # Bienvenido al Sistema de Análisis
+
+    Esta herramienta proporciona diferentes módulos para analizar el rendimiento y 
+    estado físico de los jugadores de rugby.
+
+    Selecciona una opción del menú lateral para comenzar.
+    """)
 
     if login_form():
         # Personalización de la barra lateral
