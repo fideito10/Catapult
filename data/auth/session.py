@@ -22,6 +22,7 @@ def check_credentials(password):
 
 def initialize_session():
     """Inicializa la sesión si existe un token válido"""
-    params = st.query_params.to_dict()
-    if 'session_token' in params and not get_login_status():
+    # Actualizar la API para obtener parámetros de consulta
+    query_params = st.experimental_get_query_params()
+    if 'session_token' in query_params and not get_login_status():
         set_login_status(True)

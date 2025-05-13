@@ -15,8 +15,8 @@ def login_form():
         if submit:
             if check_credentials(password):
                 token = generate_token()
-                set_login_status(True)
-                st.query_params.from_dict({"session_token": token})
+                set_login_status(True)                # Actualizar la API para manipular parámetros de consulta
+                st.experimental_set_query_params(session_token=token)
                 st.rerun()
                 return True
             else:
@@ -26,7 +26,8 @@ def login_form():
 def logout():
     """Cierra la sesión del usuario"""
     set_login_status(False)
-    st.query_params.clear()
+    # Actualizar la API para limpiar parámetros de consulta
+    st.experimental_set_query_params()
     st.rerun()
 
 def require_auth():
