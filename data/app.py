@@ -39,15 +39,7 @@ initialize_session()
 
 # Función principal
 def main():
-    st.title("Sistema de Análisis para Rugby")
-    st.markdown("""
-    # Bienvenido al Sistema de Análisis
-
-    Esta herramienta proporciona diferentes módulos para analizar el rendimiento y 
-    estado físico de los jugadores de rugby.
-
-    Selecciona una opción del menú lateral para comenzar.
-    """)
+    
 
     if login_form():
         # Personalización de la barra lateral
@@ -55,12 +47,12 @@ def main():
             # Encabezado con información del sistema            st.title('Análisis Univesitario')
             st.subheader(f"Bienvenido, Usuario")
             with st.container():
-                st.write("🎯 **Metricas**")
+                
                 # Usamos rutas relativas para mayor compatibilidad con Streamlit Cloud
-                st.page_link("pages/Dashoboard.py", label=" Dashboard Principal", icon="📊")
-                st.page_link("pages/Equipeeee.py", label=" Análisis de Equipo", icon="⚽")
-                st.page_link("pages/Jugadorr.py", label=" Análisis de Jugador", icon="👤")
-
+                st.page_link("pages/Dashoboard.py", label=" Historia Pantera", icon="🏆")
+                st.page_link("pages/Equipeeee.py", label=" Análisis de Equipo", icon="📈")
+                st.page_link("pages/Jugadorr.py", label=" Análisis de Jugador", icon="🏃")
+                st.page_link("pages/Nutricion.py", label=" Nutricion", icon="🍽️")
             # Información del sistema
             st.divider()
             with st.expander("ℹ️ Información del Sistema"):

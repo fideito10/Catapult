@@ -60,7 +60,9 @@ def load_data():
         return None
 
 
-def procesar_sesiones(df, tipo_sesion='Partido', max_fechas=None):
+# ...existing code...
+
+def procesar_sesiones(df, tipo_sesion='Partido', max_fechas=None, filtrar_por_tipo=True):
     """
     Procesa datos de sesiones específicas (Partido, Martes o Jueves)
     
@@ -68,20 +70,25 @@ def procesar_sesiones(df, tipo_sesion='Partido', max_fechas=None):
     - df: DataFrame con los datos
     - tipo_sesion: Tipo de sesión a procesar ('Partido', 'Martes', 'Jueves')
     - max_fechas: Número máximo de fechas a mostrar (None para mostrar todas)
+    - filtrar_por_tipo: Si es True, filtra por tipo_sesion; si es False, usa todos los datos
     """
     # Verificar si el DataFrame es válido
     if df is None or df.empty:
         st.warning("No hay datos disponibles para analizar.")
         return None
     
-    # Filtrar solo los registros que corresponden al tipo de sesión
-    sesiones_df = df[df['Session Title'].str.contains(tipo_sesion, case=False, na=False)].copy()
+    # Crear una copia para no modificar el original
+    sesiones_df = df.copy()
+    
+    # Filtrar solo los registros que corresponden al tipo de sesión si se especifica
+    if filtrar_por_tipo:
+        sesiones_df = sesiones_df[sesiones_df['Session Title'].str.contains(tipo_sesion, case=False, na=False)]
     
     if sesiones_df.empty:
-        st.warning(f"No se encontraron registros de {tipo_sesion} en los datos.")
+        st.warning(f"No se encontraron registros para analizar en los datos.")
         return None
     
-    # Convertir columnas necesarias
+    # Resto del código igual...
     try:
         # Convertir fecha a datetime si no lo está
         if not pd.api.types.is_datetime64_dtype(sesiones_df['Date']):
@@ -108,7 +115,7 @@ def procesar_sesiones(df, tipo_sesion='Partido', max_fechas=None):
     sesiones_stats = sesiones_stats.sort_values('Fecha', ascending=True)
     
     # Crear una columna de identificación única que combine fecha y sesión
-    sesiones_stats['Fecha_Sesion'] = sesiones_stats['Sesión']  # Solo usar el título de la sesión.astype(str) + ' - ' + sesiones_stats['Sesión']
+    sesiones_stats['Fecha_Sesion'] = sesiones_stats['Sesión']  # Solo usar el título de la sesión
     
     # Limitar por cantidad de fechas si se especifica
     if max_fechas and max_fechas > 0 and max_fechas < len(sesiones_stats):
@@ -116,6 +123,8 @@ def procesar_sesiones(df, tipo_sesion='Partido', max_fechas=None):
         sesiones_stats = sesiones_stats.tail(max_fechas)
     
     return sesiones_stats
+
+
 
 def graficar_distancia_sesion(sesiones_stats, n_sesiones, tipo_sesion):
     """
@@ -517,6 +526,8 @@ def main():
             tipos_sesion
         )
         
+
+
         # Procesar datos según la selección
         if tipo_seleccionado == "Semana":
             # Para "Semana", procesamos los últimos 3 registros independientemente del tipo
@@ -531,8 +542,8 @@ def main():
             # Filtramos datos de esas fechas
             df_ultimas = df_ordenado[df_ordenado['Date'].isin(ultimas_fechas)]
             
-            # Procesamos estos datos combinados
-            sesiones_stats = procesar_sesiones(df_ultimas, tipo_sesion="")
+            # Procesamos estos datos sin filtrar por tipo de sesión
+            sesiones_stats = procesar_sesiones(df_ultimas, tipo_sesion="Semana", filtrar_por_tipo=False)
         else:
             # Para los demás tipos, procesamos normalmente
             sesiones_stats = procesar_sesiones(df, tipo_sesion=tipo_seleccionado)

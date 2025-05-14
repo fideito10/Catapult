@@ -7,7 +7,7 @@ def login_form():
     """Muestra el formulario de inicio de sesión"""
     if get_login_status():
         return True
-
+        
     with st.form("login_form"):
         password = st.text_input("Contraseña", type="password")
         submit = st.form_submit_button("Iniciar Sesión")
@@ -15,8 +15,9 @@ def login_form():
         if submit:
             if check_credentials(password):
                 token = generate_token()
-                set_login_status(True)                # Actualizar la API para manipular parámetros de consulta
-                st.experimental_set_query_params(session_token=token)
+                set_login_status(True)
+                # Actualizar la API para manipular parámetros de consulta
+                st.query_params.update({"session_token": token})
                 st.rerun()
                 return True
             else:
@@ -27,7 +28,7 @@ def logout():
     """Cierra la sesión del usuario"""
     set_login_status(False)
     # Actualizar la API para limpiar parámetros de consulta
-    st.experimental_set_query_params()
+    st.query_params.clear()
     st.rerun()
 
 def require_auth():
